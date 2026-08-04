@@ -33,13 +33,31 @@ void Application::run()
 void Application::processEvents()
 {
 	while (const std::optional event = m_Window.pollEvent()) {
-		if (event->is<sf::Event::Closed>())
+		if (event->is<sf::Event::Closed>() || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))
 			m_Window.close();
+		if (event->is<sf::Event::MouseButtonPressed>() && event->getIf<sf::Event::MouseButtonPressed>()->button == sf::Mouse::Button::Left) {
+			sf::Vector2f mouseWorldPos = m_Window.mapPixelToCoords(sf::Vector2i(sf::Mouse::getPosition(m_Window)));
+			m_Crosshair.setPosition(mouseWorldPos);
+		}
 	}
 }
 
 void Application::update(sf::Time dT)
 {
+	sf::Vector2f direction(0.f, 0.f);
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) direction.y -= 1.f;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) direction.y += 1.f;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) direction.x -= 1.f;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) direction.x += 1.f;
+
+	// Normalize
+	float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+	if (length != 0.f)
+		direction /= length;
+
+	m_Player.setMovementDirection(direction);
+	m_Player.update(dT);
 }
 
 void Application::render()
