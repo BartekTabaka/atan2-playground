@@ -1,11 +1,12 @@
 #include "Application.h"
+#include <algorithm>
 
 const sf::Time Application::m_TimePerFrame = sf::seconds(1.f / 60.f);
 
 Application::Application()
-	: m_Window(sf::VideoMode({ 800, 600 }), "atan2-playground"),
-	  m_Textures(loadTextures()),
-	  m_Player(m_Textures.get(TextureID::Player)),
+	: m_Window(sf::VideoMode({ m_WindowWidth, m_WindowHeight }), "atan2-playground", sf::Style::Titlebar | sf::Style::Close),
+	m_Textures(loadTextures()),
+	m_Player(m_Textures.get(TextureID::Player), sf::Vector2f({ m_WindowWidth, m_WindowHeight })),
 	  m_Crosshair(m_Textures.get(TextureID::Crosshair))
 {
 }
@@ -39,11 +40,21 @@ void Application::processEvents()
 			sf::Vector2f mouseWorldPos = m_Window.mapPixelToCoords(sf::Vector2i(sf::Mouse::getPosition(m_Window)));
 			m_Crosshair.setPosition(mouseWorldPos);
 		}
+		if (event->is<sf::Event::KeyPressed>() && event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Space) {
+			if (m_Projectiles.size() <= 5)
+				m_Projectiles.emplace_back(
+					m_Textures.get(TextureID::Projectile),
+					m_Player.getPosition(),
+					m_Crosshair.getPosition(),
+					sf::Vector2f({ m_WindowWidth, m_WindowHeight })
+				);
+		}
 	}
 }
 
 void Application::update(sf::Time dT)
 {
+	// Player
 	sf::Vector2f direction(0.f, 0.f);
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) direction.y -= 1.f;
@@ -58,6 +69,18 @@ void Application::update(sf::Time dT)
 
 	m_Player.setMovementDirection(direction);
 	m_Player.update(dT);
+
+	// Projectiles
+	for (auto& projectile : m_Projectiles) {
+		projectile.update(dT);
+	}
+	
+	m_Projectiles.erase(
+		std::remove_if(m_Projectiles.begin(), m_Projectiles.end(), [](const Projectile& projectile) {
+			return projectile.isMarkedForRemoval();
+			}),
+		m_Projectiles.end()
+	);
 }
 
 void Application::render()
@@ -66,6 +89,9 @@ void Application::render()
 
 	m_Player.render(m_Window);
 	m_Crosshair.render(m_Window);
+	for (auto& projectile : m_Projectiles) {
+		projectile.render(m_Window);
+	}
 
 	m_Window.display();
 }

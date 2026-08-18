@@ -24,6 +24,7 @@ set(SOURCES
     Source/Player.h
     Source/Player.cpp
     Source/Projectile.h
+    Source/Projectile.cpp
     Source/ResourceIdentifiers.h
     Source/ResourceManager.h
 

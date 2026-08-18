@@ -1,7 +1,8 @@
 #include "Player.h"
-#include <print>
-Player::Player(const sf::Texture& texture)
-	: m_Sprite(texture)
+#include <algorithm>
+
+Player::Player(const sf::Texture& texture, const sf::Vector2f& windowSize)
+	: m_Sprite(texture), m_WindowSize(windowSize)
 {
 	m_Sprite.setScale(m_BaseScale);
 	m_Sprite.setOrigin({ m_Sprite.getLocalBounds().size.x / 2, m_Sprite.getLocalBounds().size.y / 2 });
@@ -9,7 +10,15 @@ Player::Player(const sf::Texture& texture)
 
 void Player::update(sf::Time dT)
 {
-	m_Sprite.move(m_Direction * m_Speed * dT.asSeconds());
+	const sf::Vector2f shift = m_Direction * m_Speed * dT.asSeconds();
+	const sf::Vector2f pos = m_Sprite.getPosition();
+
+	const float newX = pos.x + shift.x;
+	const float newY = pos.y + shift.y;
+
+	const float clampedX = std::clamp(newX, 0.f, m_WindowSize.x);
+	const float clampedY = std::clamp(newY, 0.f, m_WindowSize.y);
+	m_Sprite.setPosition({ clampedX, clampedY });
 }
 
 void Player::render(sf::RenderTarget& target)

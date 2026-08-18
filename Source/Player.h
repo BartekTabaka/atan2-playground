@@ -3,7 +3,7 @@
 
 class Player {
 public:
-	Player(const sf::Texture& texture);
+	Player(const sf::Texture& texture, const sf::Vector2f& windowSize);
 
 	void update(sf::Time dT);
 	void render(sf::RenderTarget& target);
@@ -14,6 +14,7 @@ public:
 private:
 	sf::Sprite m_Sprite;
 	static constexpr sf::Vector2f m_BaseScale = { 5.f, 5.f };
+	sf::Vector2f m_WindowSize;
 
 	sf::Vector2f m_Direction;
 	float m_Speed = 400.f; // Px/s
