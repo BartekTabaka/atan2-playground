@@ -17,7 +17,7 @@ private:
 private:
 	sf::Sprite m_Sprite;
 
-	sf::Vector2f m_Direction;
+	sf::Vector2f m_Direction = { 0.f, 0.f };
 	bool m_MarkedForRemoval = false;
 
 	static constexpr sf::Vector2f m_BaseScale = { 5.f, 5.f };

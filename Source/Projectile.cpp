@@ -13,14 +13,19 @@ Projectile::Projectile(const sf::Texture& texture, const sf::Vector2f& startPos,
 
 	setPosition(startPos);
 
-	// Direction
-	const sf::Vector2f delta = targetPos - startPos;
-	const float length = std::hypot(delta.x, delta.y);
+	// -- Direction ------------
+	
+	// delta - difference between points coordinates, represented by an arrow pointing from startPos to targetPos
+	const sf::Vector2f directionVector = targetPos - startPos; 
 
-	if (length > 0.f) {
-		m_Direction = delta / length;
+	// Vector length, distance between points
+	const float distance = std::hypot(directionVector.x, directionVector.y);
 
-		const float angleRad = std::atan2(delta.y, delta.x);
+	if (distance > 0.f) {
+		m_Direction = directionVector / distance; // Normalize vector
+
+		// Calculate the angle between the positive X-axis and our vector
+		const float angleRad = std::atan2(directionVector.y, directionVector.x);
 		setRotation(sf::radians(angleRad));
 	}
 	else {
