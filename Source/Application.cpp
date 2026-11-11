@@ -1,4 +1,5 @@
 ﻿#include "Application.h"
+
 #include <algorithm>
 
 // Instance of the class accessible globally (via Application::Get())
@@ -10,8 +11,8 @@ static sf::Clock s_RuntimeClock;
 Application::Application()
 	: m_Window(sf::VideoMode({ m_WindowWidth, m_WindowHeight }), "atan2-playground", sf::Style::Titlebar | sf::Style::Close),
 	m_Textures(loadTextures()),
-	m_Player(m_Textures.get(TextureID::Player), sf::Vector2f({ m_WindowWidth, m_WindowHeight })),
-	  m_Crosshair(m_Textures.get(TextureID::Crosshair))
+	m_Player(m_Textures.get(TextureID::Player)),
+	m_Crosshair(m_Textures.get(TextureID::Crosshair))
 {
 	s_Application = this;
 	s_RuntimeClock.stop();
@@ -38,13 +39,13 @@ void Application::run()
 					m_Crosshair.setPosition(mouseWorldPos);
 				}
 				if (event->is<sf::Event::KeyPressed>() && event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Space) {
-					if (m_Projectiles.size() <= 5)
+					if (m_Projectiles.size() + 1 <= 5) { // We check if there will be more than 5 projectiles AFTER we create one
 						m_Projectiles.emplace_back(
 							m_Textures.get(TextureID::Projectile),
 							m_Player.getPosition(),
-							m_Crosshair.getPosition(),
-							sf::Vector2f({ m_WindowWidth, m_WindowHeight })
-					);
+							m_Crosshair.getPosition()
+						);
+					}
 				}
 			}
 
@@ -106,10 +107,10 @@ void Application::render()
 {
 	m_Window.clear();
 
-	m_Player.render(m_Window);
-	m_Crosshair.render(m_Window);
+	m_Window.draw(m_Player);
+	m_Window.draw(m_Crosshair);
 	for (auto& projectile : m_Projectiles) {
-		projectile.render(m_Window);
+		m_Window.draw(projectile);
 	}
 
 	m_Window.display();

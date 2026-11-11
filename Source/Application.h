@@ -1,9 +1,11 @@
 ﻿#pragma once
+
+#include <vector>
+
 #include "ResourceIdentifiers.h"
 #include "Player.h"
 #include "Crosshair.h"
 #include "Projectile.h"
-#include <vector>
 
 class Application {
 public:
@@ -33,6 +35,4 @@ private:
 	Player m_Player;
 	Crosshair m_Crosshair;
 	std::vector<Projectile> m_Projectiles;
-	
-	static const sf::Time m_TimePerFrame;
 };
