@@ -1,4 +1,6 @@
-#include "Projectile.h"
+﻿#include "Projectile.h"
+
+#include <cmath>
 
 Projectile::Projectile(const sf::Texture& texture, const sf::Vector2f& startPos, const sf::Vector2f& targetPos, const sf::Vector2f& windowSize)
 	: m_Sprite(texture), m_WindowSize(windowSize)
@@ -8,19 +10,18 @@ Projectile::Projectile(const sf::Texture& texture, const sf::Vector2f& startPos,
 	m_Sprite.setPosition(startPos);
 
 	// Direction
-	sf::Vector2f delta = targetPos - startPos;
-	const float length = std::sqrt(delta.x * delta.x + delta.y * delta.y);
-	if (length != 0.f)
-		m_Direction = delta / length;
-	else
-		m_Direction = { 0.f, 1.f };
+	const sf::Vector2f delta = targetPos - startPos;
+	const float length = std::hypot(delta.x, delta.y);
 
-	if (delta.x == 0.f && delta.y == 0.f) {
-		m_Sprite.setRotation(sf::degrees(90.f));
+	if (length > 0.f) {
+		m_Direction = delta / length;
+
+		const float angleRad = std::atan2(delta.y, delta.x);
+		setRotation(sf::radians(angleRad));
 	}
 	else {
-		const float angleRad = std::atan2(delta.y, delta.x);
-		m_Sprite.setRotation(sf::radians(angleRad));
+		m_Direction = { 0.f, 1.f };
+		setRotation(sf::degrees(90.f));
 	}
 }
 
