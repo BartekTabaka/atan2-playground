@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28)
+﻿cmake_minimum_required(VERSION 3.28)
 project(atan2-playground LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
@@ -34,16 +34,21 @@ add_executable(atan2-playground)
 target_sources(atan2-playground PRIVATE ${SOURCES})
 
 # Libraries
-target_link_libraries(atan2-playground PRIVATE
-    SFML::System
-    SFML::Window
-    SFML::Graphics
+target_link_libraries(atan2-playground 
+    PRIVATE
+        sfml-system
+        sfml-graphics
+        sfml-window
 )
 
-# StartUp Project
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT atan2-playground)
+# Windows-only stuff
+if (WIN32)
+    set_target_properties(atan2-playground PROPERTIES 
+        WIN32_EXECUTABLE $<CONFIG:RELEASE>
+    )
 
-source_group("Assets" FILES ${ASSET_FILES})
+    target_link_libraries(atan2-playground PRIVATE SFML::Main)
+endif()
 
 # Copy Assets/ folder to build/ dir
 add_custom_command(
@@ -56,3 +61,8 @@ add_custom_command(
 set_target_properties(atan2-playground PROPERTIES 
     VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:atan2-playground>
 )
+
+source_group("Assets" FILES ${ASSET_FILES})
+
+# StartUp Project
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT atan2-playground)
