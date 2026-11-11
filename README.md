@@ -14,46 +14,18 @@ This is **not** meant to be played as a game — it's a learning exercise docume
 ## Requirements
 
 - C++17 or newer
-- [SFML 3](https://www.sfml-dev.org/)
-- [vcpkg](https://vcpkg.io/) (used for dependency management)
-- CMake with [presets](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html) support
+- CMake 3.28 or newer
 
 ## Build
 
-This project uses vcpkg to fetch SFML, configured through CMake presets.
+This project uses FetchContent to fetch SFML 3.0.2, configured through CMake ([Dependencies.cmake](Dependencies.cmake)).
 
-1. Set up vcpkg if you don't have it yet:
+You can easily build a .sln file through [`Setup.bat`](scripts/Setup.bat) localized in `scripts/` directory
 
-   ```bash
-   git clone https://github.com/microsoft/vcpkg.git
-   ./vcpkg/bootstrap-vcpkg.sh   # or bootstrap-vcpkg.bat on Windows
-   ```
-
-2. Create a `CMakeUserPresets.json` in the project root pointing to your local vcpkg install (this file is git-ignored, as it's machine-specific):
-
-   ```json
-   {
-     "version": 2,
-     "configurePresets": [
-       {
-         "name": "default",
-         "inherits": "vcpkg",
-         "environment": {
-           "VCPKG_ROOT": "path/to/your/vcpkg"
-         }
-       }
-     ]
-   }
-   ```
-
-   Alternatively, set the `VCPKG_ROOT` environment variable globally on your system instead.
-
-3. Configure and build:
-
-   ```bash
-   cmake --preset=default
-   cmake --build build
-   ```
+Alternatively, use:
+```
+cmake -B "build dir name" -S . -G "VisualStudio version"
+```
 
 ## Asset sources
 
