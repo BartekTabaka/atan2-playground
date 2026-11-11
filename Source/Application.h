@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "ResourceIdentifiers.h"
 #include "Player.h"
 #include "Crosshair.h"
@@ -10,16 +10,23 @@ public:
 	Application();
 
 	void run();
+	void stop();
+
+	const sf::RenderWindow& getWindow() { return m_Window; }
+
+	static Application& get(); // Get instance
+
 private:
-	void processEvents();
-	void update(sf::Time dT);
+	void update(float dT);
 	void render();
 
 	static TextureManager loadTextures();
 private:
+	bool m_Running = false;
+
 	sf::RenderWindow m_Window;
 	static constexpr unsigned int m_WindowWidth = 1280;
-	static constexpr unsigned int m_WindowHeight = 920;	
+	static constexpr unsigned int m_WindowHeight = 920;
 
 	TextureManager m_Textures;
 

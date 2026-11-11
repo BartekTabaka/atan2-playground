@@ -1,7 +1,11 @@
-#include "Application.h"
+﻿#include "Application.h"
 #include <algorithm>
 
-const sf::Time Application::m_TimePerFrame = sf::seconds(1.f / 60.f);
+// Instance of the class accessible globally (via Application::Get())
+static Application* s_Application = nullptr;
+
+// Timer that tracks the application's runtime
+static sf::Clock s_RuntimeClock;
 
 Application::Application()
 	: m_Window(sf::VideoMode({ m_WindowWidth, m_WindowHeight }), "atan2-playground", sf::Style::Titlebar | sf::Style::Close),
@@ -9,50 +13,65 @@ Application::Application()
 	m_Player(m_Textures.get(TextureID::Player), sf::Vector2f({ m_WindowWidth, m_WindowHeight })),
 	  m_Crosshair(m_Textures.get(TextureID::Crosshair))
 {
+	s_Application = this;
+	s_RuntimeClock.stop();
 }
 
 void Application::run()
 {
-	sf::Clock clock;
-	sf::Time timeSinceLastUpdate = sf::Time::Zero;
+	m_Running = true;
+	s_RuntimeClock.restart();
 
-	while (m_Window.isOpen()) {
-		sf::Time dT = clock.restart();
-		dT = std::min(dT, sf::seconds(0.25f));
-		timeSinceLastUpdate += dT;
+	float timeSinceLastUpdate = s_RuntimeClock.getElapsedTime().asSeconds();
 
-		while (timeSinceLastUpdate > m_TimePerFrame) {
-			timeSinceLastUpdate -= m_TimePerFrame;
-			processEvents();
-			update(m_TimePerFrame);
+	while (m_Running) {
+		while (m_Window.isOpen()) {
+			// Event handling
+			while (const std::optional event = m_Window.pollEvent()) {
+				if (event->is<sf::Event::Closed>() || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape)) {
+					m_Window.close();
+					stop();
+					break;
+				}
+				if (event->is<sf::Event::MouseButtonPressed>() && event->getIf<sf::Event::MouseButtonPressed>()->button == sf::Mouse::Button::Left) {
+					sf::Vector2f mouseWorldPos = m_Window.mapPixelToCoords(sf::Vector2i(sf::Mouse::getPosition(m_Window)));
+					m_Crosshair.setPosition(mouseWorldPos);
+				}
+				if (event->is<sf::Event::KeyPressed>() && event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Space) {
+					if (m_Projectiles.size() <= 5)
+						m_Projectiles.emplace_back(
+							m_Textures.get(TextureID::Projectile),
+							m_Player.getPosition(),
+							m_Crosshair.getPosition(),
+							sf::Vector2f({ m_WindowWidth, m_WindowHeight })
+					);
+				}
+			}
+
+			// DeltaTime
+			float currentTime = s_RuntimeClock.getElapsedTime().asSeconds();
+			float dT = currentTime - timeSinceLastUpdate;
+			timeSinceLastUpdate = currentTime;
+
+			update(dT);
+
+			render();
 		}
-
-		render();
 	}
 }
 
-void Application::processEvents()
+void Application::stop()
 {
-	while (const std::optional event = m_Window.pollEvent()) {
-		if (event->is<sf::Event::Closed>() || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))
-			m_Window.close();
-		if (event->is<sf::Event::MouseButtonPressed>() && event->getIf<sf::Event::MouseButtonPressed>()->button == sf::Mouse::Button::Left) {
-			sf::Vector2f mouseWorldPos = m_Window.mapPixelToCoords(sf::Vector2i(sf::Mouse::getPosition(m_Window)));
-			m_Crosshair.setPosition(mouseWorldPos);
-		}
-		if (event->is<sf::Event::KeyPressed>() && event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Space) {
-			if (m_Projectiles.size() <= 5)
-				m_Projectiles.emplace_back(
-					m_Textures.get(TextureID::Projectile),
-					m_Player.getPosition(),
-					m_Crosshair.getPosition(),
-					sf::Vector2f({ m_WindowWidth, m_WindowHeight })
-				);
-		}
-	}
+	m_Running = false;
 }
 
-void Application::update(sf::Time dT)
+Application& Application::get()
+{
+	assert(s_Application);
+	return *s_Application;
+}
+
+void Application::update(float dT)
 {
 	// Player
 	sf::Vector2f direction(0.f, 0.f);
